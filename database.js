@@ -9,6 +9,23 @@ const pool = mysql.createPool({
     database: process.env.MYSQL_DATABASE
 }).promise()
 
+export async function createUsersTable() {
+    await pool.execute(`
+        CREATE TABLE IF NOT EXISTS users (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            name VARCHAR(50) NOT NULL,
+            surname VARCHAR(50) NOT NULL,
+            password VARCHAR(255) NOT NULL,
+            email VARCHAR(100) NOT NULL,
+            last_login DATETIME NULL,
+            status ENUM('unverified', 'active', 'blocked') NOT NULL DEFAULT 'unverified', 
+            prev_status ENUM('unverified', 'active') DEFAULT 'unverified',
+            verification_token VARCHAR(255) DEFAULT NULL,
+            created TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            UNIQUE INDEX index_email (email)
+        )
+    `);
+}
 
 export async function getUsers() {
     const [rows] = await pool.query(`
